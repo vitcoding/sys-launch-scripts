@@ -1,0 +1,37 @@
+#!/bin/bash
+
+source "/home/$USER/sh/.env.projects"
+
+# Function to open a project in a new workspace
+open_project_in_workspace() {
+    local project_path=$1
+    local workspace_num=$2
+    
+    if [ -d "$project_path" ]; then
+        # Switch to the target workspace
+        wmctrl -n 5  # Ensure at least 4 workspaces exist
+        wmctrl -s "$workspace_num"
+        
+        # Open project in VS Code
+        code "$project_path" &
+        echo "Opened project on workspace $workspace_num: $project_path"
+        
+        # Wait for VS Code to open
+        sleep 2
+    else
+        echo "Error: Directory $project_path does not exist!" >&2
+    fi
+}
+
+# Get current workspace
+current_workspace=$(wmctrl -d | grep '*' | cut -d ' ' -f1)
+
+# Open projects in different workspaces
+projects=("$PROJECT_01" "$PROJECT_02" "$PROJECT_03" "$PROJECT_04" "$PROJECT_05")
+for i in "${!projects[@]}"; do
+    workspace=$((current_workspace + i))
+    open_project_in_workspace "${projects[$i]}" "$workspace"
+done
+
+# Return to original workspace (optional)
+wmctrl -s "$current_workspace"

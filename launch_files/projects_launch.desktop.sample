@@ -1,0 +1,6 @@
+# Path: ~/.config/autostart/projects_launch.desktop.sample
+[Desktop Entry]
+Type=Application
+Name=Code projects launch Bash Script
+Exec=/bin/bash /home/<USERNAME>/sh/sys-launch.projects
+Terminal=true
