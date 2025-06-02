@@ -1,6 +1,13 @@
 #!/bin/bash
 
-source "/home/$USER/sh/.env.projects"
+projects=()
+
+# Read .env file
+while IFS= read -r line; do
+    # Skip blank lines and comments
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    projects+=("$line")
+done < ".env.projects"
 
 # Function to open a project in a new workspace
 open_project_in_workspace() {
@@ -27,7 +34,7 @@ open_project_in_workspace() {
 current_workspace=$(wmctrl -d | grep '*' | cut -d ' ' -f1)
 
 # Open projects in different workspaces
-projects=("$PROJECT_01" "$PROJECT_02" "$PROJECT_03" "$PROJECT_04" "$PROJECT_05")
+
 for i in "${!projects[@]}"; do
     workspace=$((current_workspace + i))
     open_project_in_workspace "${projects[$i]}" "$workspace"
