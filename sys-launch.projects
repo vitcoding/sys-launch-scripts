@@ -7,7 +7,7 @@ while IFS= read -r line; do
     # Skip blank lines and comments
     [[ -z "$line" || "$line" == \#* ]] && continue
     projects+=("$line")
-done < ".env.projects"
+done < "$HOME/sh/.env.projects"
 
 # Function to open a project in a new workspace
 open_project_in_workspace() {
