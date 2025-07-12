@@ -1,18 +1,41 @@
 #!/bin/bash
 
-source "$HOME/sh/bot_backup/.env.remote"
+# Load environment variables
+source "$HOME/sh/bot_backup/.env.remote" || {
+    echo "Error: Failed to load .env.remote" >&2
+    exit 1
+}
 
-ssh -p "$REMOTE_PORT" -i "$SSH_KEY" -t "$REMOTE_USER@$REMOTE_HOST" "
-    cd "$REMOTE_BOT_DIR";
-    pwd;
-    rm -rf ./_temp/backups/last_regular;
-    tree -L 4;
-    chmod +x ./sh/regular_backup/regular_backup.sh;
-    ./sh/regular_backup/regular_backup.sh;
-    tree -L 4;
-"
+# Execute remote commands via SSH (without -t for pseudo-terminal)
+ssh_exit_code=0
+ssh -p "$REMOTE_PORT" -i "$SSH_KEY" "$REMOTE_USER@$REMOTE_HOST" "
+    cd '$REMOTE_BOT_DIR' || exit 1
+    pwd
+    rm -rf ./_temp/backups/last_regular || exit 1
+    # tree -L 4
+    chmod +x ./sh/regular_backup/regular_backup.sh
+    ./sh/regular_backup/regular_backup.sh || exit 1
+    # tree -L 4
+" || ssh_exit_code=$?
 
-scp -o "BatchMode=yes" -o "StrictHostKeyChecking=no" \
-    -i "$SSH_KEY" -P "$REMOTE_PORT" \
-    -r "$REMOTE_USER@$REMOTE_HOST:$REMOTE_LAST_REGULAR_BACKUP_DIR"/* \
-    "$LOCAL_REGULAR_BACKUP_DIR/$(date '+%Y%m%d_%H%M')"
+# Check if SSH command failed
+if [ "$ssh_exit_code" -ne 0 ]; then
+    echo "SSH command failed (exit code $ssh_exit_code)" >&2
+    exit "$ssh_exit_code"
+fi
+
+# Create local backup directory with timestamp
+mkdir -p "$LOCAL_REGULAR_BACKUP_DIR/$(date '+%Y%m%d_%H%M')" || exit 1
+
+# Copy backup files from remote to local
+scp -i "$SSH_KEY" -P "$REMOTE_PORT" \
+    -o "BatchMode=yes" \
+    -o "StrictHostKeyChecking=no" \
+    -r "$REMOTE_USER@$REMOTE_HOST:$REMOTE_LAST_REGULAR_BACKUP_DIR/"* \
+    "$LOCAL_REGULAR_BACKUP_DIR/$(date '+%Y%m%d_%H%M')/" || {
+    echo "SCP copy failed" >&2
+    exit 1
+}
+
+echo "Backup completed successfully"
+exit 0

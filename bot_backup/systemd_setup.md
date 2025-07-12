@@ -27,9 +27,12 @@ sudo nano /etc/systemd/system/bot_backup.timer
 Description=Run bot_backup daily
 
 [Timer]
+Unit=bot_backup.service
 OnCalendar=daily    # Daily at 00:00:00
 AccuracySec=1h      # Starting with an error of ± 1 hour (to save energy)
 Persistent=true     # If the PC was turned off, it will complete the task when turned on.
+OnBootSec=1m
+OnStartupSec=1m
 
 [Install]
 WantedBy=timers.target
