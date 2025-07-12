@@ -12,4 +12,7 @@ ssh -p "$REMOTE_PORT" -i "$SSH_KEY" -t "$REMOTE_USER@$REMOTE_HOST" "
     tree -L 4;
 "
 
-scp -r "$REMOTE_USER@$REMOTE_HOST":"$REMOTE_LAST_REGULAR_BACKUP_DIR"/* "$LOCAL_REGULAR_BACKUP_DIR"/$(date '+%Y%m%d_%H%M')
+scp -o "BatchMode=yes" -o "StrictHostKeyChecking=no" \
+    -i "$SSH_KEY" -P "$REMOTE_PORT" \
+    -r "$REMOTE_USER@$REMOTE_HOST:$REMOTE_LAST_REGULAR_BACKUP_DIR"/* \
+    "$LOCAL_REGULAR_BACKUP_DIR/$(date '+%Y%m%d_%H%M')"
