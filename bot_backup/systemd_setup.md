@@ -12,7 +12,7 @@ Type=simple
 ExecStart=/home/<user>/sh/bot_backup/bot_regular_backup.sh
 User=<user>
 WorkingDirectory=/home/<user>/sh/bot_backup/
-StandardOutput=file:/home/<user>/sh/bot_backup/backup.log
+StandardOutput=append:/home/<user>/sh/bot_backup/backup.log
 StandardError=inherit
 
 ```

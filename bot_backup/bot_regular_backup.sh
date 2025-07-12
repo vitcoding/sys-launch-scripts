@@ -2,7 +2,7 @@
 
 # Load environment variables
 source "$HOME/sh/bot_backup/.env.remote" || {
-    echo "Error: Failed to load .env.remote" >&2
+    echo "$(date '+%Y%m%d_%H%M'): Error: Failed to load .env.remote" >&2
     exit 1
 }
 
@@ -20,7 +20,7 @@ ssh -p "$REMOTE_PORT" -i "$SSH_KEY" "$REMOTE_USER@$REMOTE_HOST" "
 
 # Check if SSH command failed
 if [ "$ssh_exit_code" -ne 0 ]; then
-    echo "SSH command failed (exit code $ssh_exit_code)" >&2
+    echo "$(date '+%Y%m%d_%H%M'): SSH command failed (exit code $ssh_exit_code)" >&2
     exit "$ssh_exit_code"
 fi
 
@@ -33,9 +33,9 @@ scp -i "$SSH_KEY" -P "$REMOTE_PORT" \
     -o "StrictHostKeyChecking=no" \
     -r "$REMOTE_USER@$REMOTE_HOST:$REMOTE_LAST_REGULAR_BACKUP_DIR/"* \
     "$LOCAL_REGULAR_BACKUP_DIR/$(date '+%Y%m%d_%H%M')/" || {
-    echo "SCP copy failed" >&2
+    echo "$(date '+%Y%m%d_%H%M'): SCP copy failed" >&2
     exit 1
 }
 
-echo "Backup completed successfully"
+echo "$(date '+%Y%m%d_%H%M'): Backup completed successfully" >> /dev/stdout
 exit 0
